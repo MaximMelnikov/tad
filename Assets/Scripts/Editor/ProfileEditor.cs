@@ -28,7 +28,8 @@ public class ProfileEditor : Editor
         Profile profile = new Profile
         {
             currentAdventure = "test.json",
-            currentNodeId = String.Empty
+            currentNodeId = String.Empty,
+            values = new System.Collections.Generic.Dictionary<string, string>()
         };
 
         if (!Directory.Exists(StandardPaths.saveDataDirectory))

@@ -15,15 +15,14 @@ public class TAListItem : MonoBehaviourEX
     [HideInInspector]
     public Button buttonPrefab;
     [HideInInspector]
-    public LayoutGroup buttonsLayout;
-    const float timeToNext = 1f;
+    public LayoutGroup buttonsLayout;    
 
     public void Init() {
         rectTransform = GetComponent<RectTransform>();
         Vector2 listSize = transform.parent.GetComponent<RectTransform>().sizeDelta;
         rectTransform.sizeDelta = new Vector2(listSize.x, listSize.y / 6);
         gameObject.SetActive(true);
-        buttonPrefab = GetComponentInChildren<Button>();
+        buttonPrefab = transform.Find("Button").GetComponent<Button>();
         buttonsLayout = GetComponentInChildren<LayoutGroup>();
         text = transform.Find("text").GetComponent<Text>();
         title = transform.Find("title").GetComponent<Text>();
@@ -33,75 +32,6 @@ public class TAListItem : MonoBehaviourEX
         rectTransform.anchoredPosition = new Vector2(0, 0 - rectTransform.rect.height * row);
     }
 
-    public void ShowGraphElement(BaseNode node)
-    {
-        if (node.type == "End")
-        {
-            EndNode endNode = (EndNode)node;
-            //the end
-        }
-        else if (node.type == "Set")
-        {
-            SetNode setNode = (SetNode)node;
-            ProfileManager.currentProfile.SetValue(setNode.variable, setNode.value);
-            AddTimer(timeToNext, ()=> { ShowGraphElement(GameManager.Instance.graph.GetNode(setNode).GetConnection()); });
-        }
-        else if (node.type == "Checkpoint")
-        {
-            CheckpointNode checkpointNode = (CheckpointNode)node;
-            ProfileManager.currentProfile.AddCheckpoint(node.id);
-            AddTimer(timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(checkpointNode).GetConnection()); });
-        }
-        else if (node.type == "Deadend")
-        {
-            DeadendNode deadendNode = (DeadendNode)node;
-            //return to previous checkpoint
-        }
-        else if (node.type == "Branch")
-        {
-            BranchNode deadendNode = (BranchNode)node;
-            string value = ProfileManager.currentProfile.GetValue(deadendNode.variable);
-
-            /*if (deadendNode.branches == 2)
-            {
-                Debug.Log("Can't be only one variant in Branch");
-            }
-            else
-            {
-                for (int i = 0; i < node.branches.length; i++)
-                {
-                    if (node.value == node.branches[i])
-                    {
-                        if (i == node.branches.lenght - 1)
-                        {
-                            ShowGraphElement(node.branches[node.branches.length]);
-                        }
-                        else
-                        {
-                            ShowGraphElement(node.branches[i]);
-                        }
-                    }
-                }
-            } */           
-        }
-        else if (node.type == "Text")
-        {
-            TextNode textNode = (TextNode)node;
-            TAListItem item = GameManager.Instance.TAListContainer.AddItem();
-            item.SetText(textNode);
-        }
-        else if (node.type == "Start")
-        {
-            StartNode startNode = (StartNode)node;
-            AddTimer(timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(startNode).GetConnection()); });
-        }
-        else if (node.type == "Choice")
-        {
-            ChoiceNode choiceNode = (ChoiceNode)node;
-            AddTimer(timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(choiceNode).GetConnection()); });
-        }
-    }
-
     public void SetText(TextNode textNode)
     {
         title.text = textNode.actor;
@@ -109,11 +39,12 @@ public class TAListItem : MonoBehaviourEX
 
         if (textNode.choices != null && textNode.choices.Length > 0)
         {
-            ShowButtons(textNode.choices);
+            TAListItem item = GameManager.Instance.TAListContainer.AddItem();
+            item.ShowButtons(textNode.choices);
         }
         else
         {
-            AddTimer(timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(textNode).GetConnection()); });
+            AddTimer(GameManager.timeToNext, () => { GameManager.Instance.TAListContainer.ShowGraphElement(GameManager.Instance.graph.GetNode(textNode).GetConnection()); });
         }
     }
 
@@ -121,12 +52,22 @@ public class TAListItem : MonoBehaviourEX
     {
         foreach (var i in buttonsIds)
         {
-            //AddItemButton(i);
+            AddItemButton(i);
         }
+    }
+
+    public void AddItemButton(string id)
+    {
+        Button btn = Instantiate(buttonPrefab, buttonsLayout.transform);
+        buttons.Add(btn);
+        ChoiceNode cn = (ChoiceNode)(GameManager.Instance.taDeserialize.GetItemById(id));
+        Text txt = btn.GetComponentInChildren<Text>();
+        btn.onClick.AddListener(() => PressBtn(cn.next));
+        txt.text = cn.name;
     }
 
     public void PressBtn(string id)
     {
-        //ShowGraphElement(node.branches[i]);
+        GameManager.Instance.TAListContainer.ShowGraphElement(GameManager.Instance.graph.GetNodeById(id));
     }
 }

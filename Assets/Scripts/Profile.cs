@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -100,6 +99,7 @@ public class Profile
             values.Remove(variable);
         }
         values.Add(variable, value);
+        SaveXml();
     }
 
     public void AddCheckpoint(string id)

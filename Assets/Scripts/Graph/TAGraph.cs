@@ -29,6 +29,13 @@ public class Graph
         Nodes.TryGetValue(obj.id, out node);
         return node;
     }
+
+    public BaseNode GetNodeById(string id)
+    {
+        Node node;
+        Nodes.TryGetValue(id, out node);
+        return node.obj;
+    }
 }
 
 public class NodeConnection

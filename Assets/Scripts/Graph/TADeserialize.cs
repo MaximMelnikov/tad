@@ -29,6 +29,11 @@ public class TADeserialize
             return await Task.FromResult(nodes);
         }*/
 
+    public BaseNode GetItemById(string id)
+    {
+        return nodes.FirstOrDefault(s => s.id == id);
+    }
+
     public void InitializeAsync()
     {
         Debug.Log("InitializeAsync");

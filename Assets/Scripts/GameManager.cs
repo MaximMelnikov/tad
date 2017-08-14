@@ -5,21 +5,17 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
     public static GameManager Instance;
+    public const float timeToNext = 1f;
     public Graph graph;
     public TAListContainer TAListContainer;
+    public TADeserialize taDeserialize;
 
     void Awake () {
         Instance = this;
         TAListContainer = FindObjectOfType<TAListContainer>();
-        TADeserialize taDeserialize = new TADeserialize();
+        taDeserialize = new TADeserialize();
         taDeserialize.InitializeAsync();
 
-        TAListItem item = TAListContainer.AddItem();
-        item.ShowGraphElement(graph.Nodes.First().Value.obj);
+        TAListContainer.ShowGraphElement(graph.Nodes.First().Value.obj);
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }
