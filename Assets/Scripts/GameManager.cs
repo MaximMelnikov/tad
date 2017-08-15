@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour {
@@ -12,10 +10,9 @@ public class GameManager : MonoBehaviour {
 
     void Awake () {
         Instance = this;
-        TAListContainer = FindObjectOfType<TAListContainer>();
         taDeserialize = new TADeserialize();
         taDeserialize.InitializeAsync();
 
-        TAListContainer.ShowGraphElement(graph.Nodes.First().Value.obj);
+        TAListContainer.ShowGraphElement(graph.Nodes.First().Value);
     }
 }

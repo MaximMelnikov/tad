@@ -60,7 +60,7 @@ public class Profile
 {
     public string currentAdventure;
     public string currentNodeId;
-    public string lastCheckpoint;
+    public List<string> lastCheckpoint;
     [XmlIgnore]
     public Dictionary<string, string> values { get; set; }
 
@@ -104,7 +104,7 @@ public class Profile
 
     public void AddCheckpoint(string id)
     {
-        lastCheckpoint = id;
+        lastCheckpoint.Add(id);
     }
 
     public string GetValue(string variable)

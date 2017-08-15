@@ -28,6 +28,18 @@ public class TAListItem : MonoBehaviourEX
         title = transform.Find("title").GetComponent<Text>();
     }
 
+    public void Clear()
+    {
+        foreach (var btn in buttons)
+        {
+            Destroy(btn.gameObject);
+        }
+        buttons.Clear();
+
+        title.text = string.Empty;
+        text.text = string.Empty;
+    }
+
     public void SetRow(int row) {
         rectTransform.anchoredPosition = new Vector2(0, 0 - rectTransform.rect.height * row);
     }
@@ -44,7 +56,8 @@ public class TAListItem : MonoBehaviourEX
         }
         else
         {
-            AddTimer(GameManager.timeToNext, () => { GameManager.Instance.TAListContainer.ShowGraphElement(GameManager.Instance.graph.GetNode(textNode).GetConnection()); });
+            bool ac = gameObject.activeInHierarchy;
+            AddTimer(GameManager.timeToNext, () => { GameManager.Instance.TAListContainer.ShowGraphElement(GameManager.Instance.graph.GetNode(textNode).GetFirstConnection()); });
         }
     }
 
@@ -56,7 +69,7 @@ public class TAListItem : MonoBehaviourEX
         }
     }
 
-    public void AddItemButton(string id)
+    private void AddItemButton(string id)
     {
         Button btn = Instantiate(buttonPrefab, buttonsLayout.transform);
         buttons.Add(btn);
@@ -68,6 +81,10 @@ public class TAListItem : MonoBehaviourEX
 
     public void PressBtn(string id)
     {
-        GameManager.Instance.TAListContainer.ShowGraphElement(GameManager.Instance.graph.GetNodeById(id));
+        GameManager.Instance.TAListContainer.ShowGraphElement(GameManager.Instance.graph.GetNode(id));
+        foreach (var btn in buttons)
+        {
+            btn.interactable = false;
+        }
     }
 }

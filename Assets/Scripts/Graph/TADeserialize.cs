@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -8,26 +9,6 @@ public class TADeserialize
 {
     bool isInitialized;
     BaseNode[] nodes;
-        /*public async Task<BaseNode> GetItemAsync(Type nodeType)
-        {
-            await InitializeAsync();
-
-            return await Task.FromResult(nodes.FirstOrDefault(s => s.GetType() == nodeType));
-        }
-
-        public async Task<BaseNode> GetItemAsync(string id)
-        {
-            await InitializeAsync();
-
-            return await Task.FromResult(nodes.FirstOrDefault(s => s.id == id));
-        }
-
-        public async Task<IEnumerable<BaseNode>> GetItemsAsync(bool forceRefresh = false)
-        {
-            await InitializeAsync();
-
-            return await Task.FromResult(nodes);
-        }*/
 
     public BaseNode GetItemById(string id)
     {
@@ -59,9 +40,33 @@ public class TADeserialize
         {
             GameManager.Instance.graph.AddNode(item);
 
-            if (item.type == "Branch")
-            {
-                Debug.Log("");
+            if (item.type == "Branch") {
+                BranchNode branchNode = (BranchNode)item;
+                branchNode.branchNodeVariables = new List<BranchNodeVariables>();
+                string str = branchNode.branches.ToString();
+                str = str.Replace("{\r\n", "");
+                str = str.Replace("\r\n}", "");
+                str = str.Replace(",\r\n  ", "%");
+                str = str.Replace("\"", "");
+                str = str.Replace("\"", "");
+                str = str.Replace(": ", ":");
+                string[] split = str.Split('%');
+                for (int i = 0; i < split.Length - 1; i++) //exclude last (_default) element
+                {
+                    string[] bnvsplit;
+                    if (i == split.Length - 2)
+                    {
+                        bnvsplit = split[split.Length - 1].Split(':');
+                    }
+                    else
+                    {
+                        bnvsplit = split[i].Split(':');
+                    }
+                    BranchNodeVariables bnv = new BranchNodeVariables();                    
+                    bnv.condition = bnvsplit[0];
+                    bnv.next = bnvsplit[1];
+                    branchNode.branchNodeVariables.Add(bnv);
+                }
             }
         }
         int k = 0;
@@ -70,7 +75,7 @@ public class TADeserialize
             var temp = nodes.FirstOrDefault(s => s.id == item.next);
             if (temp != null)
             {
-                GameManager.Instance.graph.AddConnection(item.id, temp.id, 1);
+                item.AddConnection(GameManager.Instance.graph.GetNode(temp));
             }
             else
             {
@@ -84,13 +89,12 @@ public class TADeserialize
                         var _temp = nodes.FirstOrDefault(s => s.id == j);
                         if (_temp != null)
                         {
-                            GameManager.Instance.graph.AddConnection(item.id, _temp.id, 1);
+                            item.AddConnection(GameManager.Instance.graph.GetNode(_temp));
                         }
                     }
                 }
             }
         }
-        Debug.Log(nodes[0].id);
         isInitialized = true;
     }
 }

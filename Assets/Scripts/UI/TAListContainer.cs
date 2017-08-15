@@ -38,13 +38,8 @@ public class TAListContainer : MonoBehaviourEX
             item = itemsList.Dequeue();
         }
         itemsList.Enqueue(item);
-
-        foreach (var btn in item.buttons)
-        {
-            Destroy(btn);
-        }
+        item.Clear();
         item.rectTransform.gameObject.SetActive(true);
-        item.buttons.Clear();
         item.SetRow( lastItemNum++ );
         TAScroll.topBound = itemsList.Peek().rectTransform.anchoredPosition.y;
         TAScroll.downBound = item.rectTransform.anchoredPosition.y + canvasRectTransform.rect.height - 20 - item.rectTransform.rect.height;
@@ -67,19 +62,18 @@ public class TAListContainer : MonoBehaviourEX
         if (node.type == "End")
         {
             EndNode endNode = (EndNode)node;
-            //the end
         }
         else if (node.type == "Set")
         {
             SetNode setNode = (SetNode)node;
             ProfileManager.currentProfile.SetValue(setNode.variable, setNode.value);
-            AddTimer(GameManager.timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(setNode).GetConnection()); });
+            AddTimer(GameManager.timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(setNode).GetFirstConnection()); });
         }
         else if (node.type == "Checkpoint")
         {
             CheckpointNode checkpointNode = (CheckpointNode)node;
             ProfileManager.currentProfile.AddCheckpoint(node.id);
-            AddTimer(GameManager.timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(checkpointNode).GetConnection()); });
+            AddTimer(GameManager.timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(checkpointNode).GetFirstConnection()); });
         }
         else if (node.type == "Deadend")
         {
@@ -90,28 +84,7 @@ public class TAListContainer : MonoBehaviourEX
         {
             BranchNode branchNode = (BranchNode)node;
             string value = ProfileManager.currentProfile.GetValue(branchNode.variable);
-
-            /*if (branchNode.branches == 2)
-            {
-                Debug.Log("Can't be only one variant in Branch");
-            }
-            else
-            {
-                for (int i = 0; i < node.branches.length; i++)
-                {
-                    if (node.value == node.branches[i])
-                    {
-                        if (i == node.branches.lenght - 1)
-                        {
-                            ShowGraphElement(node.branches[node.branches.length]);
-                        }
-                        else
-                        {
-                            ShowGraphElement(node.branches[i]);
-                        }
-                    }
-                }
-            }  */
+            AddTimer(GameManager.timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(branchNode.GetNextStep(value))); });
         }
         else if (node.type == "Text")
         {
@@ -122,13 +95,12 @@ public class TAListContainer : MonoBehaviourEX
         else if (node.type == "Start")
         {
             StartNode startNode = (StartNode)node;
-            gameObject.SetActive(false);
-            ShowGraphElement(GameManager.Instance.graph.GetNode(startNode).GetConnection());            
+            ShowGraphElement(GameManager.Instance.graph.GetNode(startNode).GetFirstConnection());            
         }
         else if (node.type == "Choice")
         {
             ChoiceNode choiceNode = (ChoiceNode)node;
-            AddTimer(GameManager.timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(choiceNode).GetConnection()); });
+            AddTimer(GameManager.timeToNext, () => { ShowGraphElement(GameManager.Instance.graph.GetNode(choiceNode).GetFirstConnection()); });
         }
     }
 }
